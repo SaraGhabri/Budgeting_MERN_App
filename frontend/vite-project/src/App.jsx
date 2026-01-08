@@ -1,35 +1,61 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import { Routes, Route, Navigate } from 'react-router-dom';
+import { useAuth } from './context/AuthContext';
+import Login from './pages/Auth/Login';
+import Register from './pages/Auth/Register';
+import Dashboard from './pages/Dashboard/Dashboard';
 
 function App() {
-  const [count, setCount] = useState(0)
+  const { user } = useAuth();
 
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
+    <Routes>
+      {/* Routes publiques */}
+      <Route 
+        path="/login" 
+        element={!user ? <Login /> : <Navigate to="/dashboard" />} 
+      />
+      <Route 
+        path="/register" 
+        element={!user ? <Register /> : <Navigate to="/dashboard" />} 
+      />
+      
+      {/* Routes protégées */}
+      <Route 
+        path="/dashboard" 
+        element={user ? <Dashboard /> : <Navigate to="/login" />} 
+      />
+
+      {/* TODO: Ajouter les autres routes */}
+      <Route 
+        path="/budgets" 
+        element={user ? <div>Budgets (à venir)</div> : <Navigate to="/login" />} 
+      />
+      <Route 
+        path="/expenses" 
+        element={user ? <div>Dépenses (à venir)</div> : <Navigate to="/login" />} 
+      />
+      <Route 
+        path="/categories" 
+        element={user ? <div>Catégories (à venir)</div> : <Navigate to="/login" />} 
+      />
+      <Route 
+        path="/profile" 
+        element={user ? <div>Profil (à venir)</div> : <Navigate to="/login" />} 
+      />
+      
+      {/* Redirection par défaut */}
+      <Route 
+        path="/" 
+        element={<Navigate to={user ? "/dashboard" : "/login"} />} 
+      />
+      
+      {/* 404 */}
+      <Route 
+        path="*" 
+        element={<Navigate to="/" />} 
+      />
+    </Routes>
+  );
 }
 
-export default App
+export default App;

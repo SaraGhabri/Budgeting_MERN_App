@@ -3,6 +3,8 @@ import { Link } from 'react-router-dom';
 import { Wallet, TrendingUp, TrendingDown, PlusCircle } from 'lucide-react';
 import Layout from '../../components/layout/Layout';
 import { useAuth } from '../../context/AuthContext';
+import budgetService from '../../services/budgetService';
+import expenseService from '../../services/expenseService';
 
 const Dashboard = () => {
   const { user } = useAuth();
@@ -12,22 +14,66 @@ const Dashboard = () => {
     totalAmount: 0,
     expenseAmount: 0
   });
+  const [loading, setLoading] = useState(true);
 
-  // TODO: Charger les vraies données depuis l'API
+  // Charger les vraies données depuis l'API
   useEffect(() => {
-    // Simuler des données pour l'instant
-    setStats({
-      totalBudgets: 3,
-      totalExpenses: 12,
-      totalAmount: 5000,
-      expenseAmount: 2340
-    });
+    loadDashboardData();
   }, []);
+
+  const loadDashboardData = async () => {
+    try {
+      setLoading(true);
+      
+      // Charger budgets et expenses en parallèle
+      const [budgetsData, expensesData] = await Promise.all([
+        budgetService.getAll(),
+        expenseService.getAll()
+      ]);
+
+      // Calculer les statistiques
+      const totalBudgets = budgetsData.length;
+      const totalExpenses = expensesData.length;
+      
+      // Somme de tous les montants de budgets
+      const totalAmount = budgetsData.reduce((sum, budget) => {
+        return sum + (Number(budget.amount) || 0);
+      }, 0);
+      
+      // Somme de tous les montants de dépenses
+      const expenseAmount = expensesData.reduce((sum, expense) => {
+        return sum + (Number(expense.amount) || 0);
+      }, 0);
+
+      setStats({
+        totalBudgets,
+        totalExpenses,
+        totalAmount,
+        expenseAmount
+      });
+    } catch (error) {
+      console.error('Erreur chargement dashboard:', error);
+      // Garder les stats à 0 en cas d'erreur
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const remaining = stats.totalAmount - stats.expenseAmount;
   const percentUsed = stats.totalAmount > 0 
     ? ((stats.expenseAmount / stats.totalAmount) * 100).toFixed(1) 
     : 0;
+
+  if (loading) {
+    return (
+      <Layout title="Dashboard">
+        <div className="loading">
+          <div className="spinner"></div>
+          <p>Chargement des statistiques...</p>
+        </div>
+      </Layout>
+    );
+  }
 
   return (
     <Layout title="Dashboard">

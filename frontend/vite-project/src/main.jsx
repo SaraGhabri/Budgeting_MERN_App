@@ -5,11 +5,15 @@ import { Toaster } from 'react-hot-toast';
 import { AuthProvider } from './context/AuthContext';
 import App from './App';
 
-// Import des styles
 import './styles/index.css';
 import './styles/auth.css';
 import './styles/layout.css';
 import './styles/dashboard.css';
+import './styles/crud.css';
+import './styles/budget.css';
+import './styles/expense.css';
+import './styles/category.css';
+import './styles/profile.css';
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>

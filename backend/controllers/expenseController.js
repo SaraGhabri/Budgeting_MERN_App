@@ -3,26 +3,28 @@ import Budget from "../models/Budget.js";
 
 // CREATE Expense
 export const createExpense = async (req, res) => {
-  const { amount, description, category, budget } = req.body;
-
+  const { amount, description, category, budget, date } = req.body;
+  
   try {
     // Vérifier que le budget appartient à l'utilisateur
     const budgetExists = await Budget.findOne({
       _id: budget,
       user: req.user._id,
     });
-
-    if (!budgetExists)
-      return res.status(400).json({ message: "Invalid budget" });
-
+    
+    if (!budgetExists) {
+      return res.status(400).json({ message: "Budget invalide" });
+    }
+    
     const expense = await Expense.create({
       user: req.user._id,
       amount,
       description,
       category,
       budget,
+      date: date || Date.now(),
     });
-
+    
     res.status(201).json(expense);
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -33,9 +35,9 @@ export const createExpense = async (req, res) => {
 export const getExpenses = async (req, res) => {
   try {
     const expenses = await Expense.find({ user: req.user._id })
-      .populate("category", "name")
-      .populate("budget", "month totalAmount");
-
+      .populate("category", "name description")
+      .populate("budget", "name amount startDate endDate")
+      .sort({ date: -1 });
     res.json(expenses);
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -50,8 +52,8 @@ export const getExpensesByBudget = async (req, res) => {
       budget: req.params.budgetId,
     })
       .populate("category", "name")
-      .populate("budget", "month");
-
+      .populate("budget", "name amount")
+      .sort({ date: -1 });
     res.json(expenses);
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -65,15 +67,23 @@ export const updateExpense = async (req, res) => {
       _id: req.params.id,
       user: req.user._id,
     });
-
-    if (!expense)
-      return res.status(404).json({ message: "Expense not found" });
-
+    
+    if (!expense) {
+      return res.status(404).json({ message: "Dépense non trouvée" });
+    }
+    
     expense.amount = req.body.amount || expense.amount;
     expense.description = req.body.description || expense.description;
     expense.category = req.body.category || expense.category;
-
+    expense.budget = req.body.budget || expense.budget;
+    expense.date = req.body.date || expense.date;
+    
     const updatedExpense = await expense.save();
+    
+    // Populate avant de renvoyer
+    await updatedExpense.populate("category", "name");
+    await updatedExpense.populate("budget", "name amount");
+    
     res.json(updatedExpense);
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -87,11 +97,12 @@ export const deleteExpense = async (req, res) => {
       _id: req.params.id,
       user: req.user._id,
     });
-
-    if (!expense)
-      return res.status(404).json({ message: "Expense not found" });
-
-    res.json({ message: "Expense deleted successfully" });
+    
+    if (!expense) {
+      return res.status(404).json({ message: "Dépense non trouvée" });
+    }
+    
+    res.json({ message: "Dépense supprimée avec succès" });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }

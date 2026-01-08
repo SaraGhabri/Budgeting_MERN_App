@@ -3,6 +3,10 @@ import { useAuth } from './context/AuthContext';
 import Login from './pages/Auth/Login';
 import Register from './pages/Auth/Register';
 import Dashboard from './pages/Dashboard/Dashboard';
+import Budgets from './pages/Budget/Budgets';
+import Expenses from './pages/Expense/Expenses';
+import Categories from './pages/Category/Categories';
+import Profile from './pages/Profile/Profile';
 
 function App() {
   const { user } = useAuth();
@@ -24,23 +28,25 @@ function App() {
         path="/dashboard" 
         element={user ? <Dashboard /> : <Navigate to="/login" />} 
       />
-
-      {/* TODO: Ajouter les autres routes */}
+      
       <Route 
         path="/budgets" 
-        element={user ? <div>Budgets (à venir)</div> : <Navigate to="/login" />} 
+        element={user ? <Budgets /> : <Navigate to="/login" />}
       />
+      
       <Route 
         path="/expenses" 
-        element={user ? <div>Dépenses (à venir)</div> : <Navigate to="/login" />} 
+        element={user ? <Expenses /> : <Navigate to="/login" />}
       />
+      
       <Route 
         path="/categories" 
-        element={user ? <div>Catégories (à venir)</div> : <Navigate to="/login" />} 
+        element={user ? <Categories /> : <Navigate to="/login" />}
       />
+      
       <Route 
         path="/profile" 
-        element={user ? <div>Profil (à venir)</div> : <Navigate to="/login" />} 
+        element={user ? <Profile /> : <Navigate to="/login" />}
       />
       
       {/* Redirection par défaut */}

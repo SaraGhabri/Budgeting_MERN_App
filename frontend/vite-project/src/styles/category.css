@@ -1,0 +1,10 @@
+/* ===== CATEGORY PAGE SPECIFIC ===== */
+.category-name {
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.category-description {
+  color: var(--text-secondary);
+  font-size: 0.875rem;
+}

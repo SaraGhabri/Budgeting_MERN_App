@@ -2,15 +2,16 @@ import Budget from "../models/Budget.js";
 
 // CREATE Budget
 export const createBudget = async (req, res) => {
-  const { month, totalAmount } = req.body;
-
+  const { name, amount, startDate, endDate } = req.body;
+  
   try {
     const budget = await Budget.create({
       user: req.user._id,
-      month,
-      totalAmount,
+      name,
+      amount,
+      startDate,
+      endDate,
     });
-
     res.status(201).json(budget);
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -20,7 +21,7 @@ export const createBudget = async (req, res) => {
 // GET all Budgets for connected user
 export const getBudgets = async (req, res) => {
   try {
-    const budgets = await Budget.find({ user: req.user._id });
+    const budgets = await Budget.find({ user: req.user._id }).sort({ createdAt: -1 });
     res.json(budgets);
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -34,10 +35,11 @@ export const getBudgetById = async (req, res) => {
       _id: req.params.id,
       user: req.user._id,
     });
-
-    if (!budget)
+    
+    if (!budget) {
       return res.status(404).json({ message: "Budget not found" });
-
+    }
+    
     res.json(budget);
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -51,13 +53,17 @@ export const updateBudget = async (req, res) => {
       _id: req.params.id,
       user: req.user._id,
     });
-
-    if (!budget)
+    
+    if (!budget) {
       return res.status(404).json({ message: "Budget not found" });
-
-    budget.month = req.body.month || budget.month;
-    budget.totalAmount = req.body.totalAmount || budget.totalAmount;
-
+    }
+    
+    // Mettre à jour les champs
+    budget.name = req.body.name || budget.name;
+    budget.amount = req.body.amount || budget.amount;
+    budget.startDate = req.body.startDate || budget.startDate;
+    budget.endDate = req.body.endDate || budget.endDate;
+    
     const updatedBudget = await budget.save();
     res.json(updatedBudget);
   } catch (error) {
@@ -72,10 +78,11 @@ export const deleteBudget = async (req, res) => {
       _id: req.params.id,
       user: req.user._id,
     });
-
-    if (!budget)
+    
+    if (!budget) {
       return res.status(404).json({ message: "Budget not found" });
-
+    }
+    
     res.json({ message: "Budget deleted successfully" });
   } catch (error) {
     res.status(500).json({ message: error.message });

@@ -1,48 +1,67 @@
-import { body, param } from "express-validator";
-import { handleValidationErrors } from "./authValidator.js";
+import { body, param } from 'express-validator';
 
-export const validateCreateBudget = [
-  body("month")
+export const createBudgetValidation = [
+  body('name')
+    .trim()
     .notEmpty()
-    .withMessage("Le mois est requis")
-    .matches(/^\d{4}-(0[1-9]|1[0-2])$/)
-    .withMessage("Format invalide. Utilisez YYYY-MM (ex: 2025-01)"),
+    .withMessage('Le nom du budget est requis')
+    .isLength({ min: 3, max: 100 })
+    .withMessage('Le nom doit contenir entre 3 et 100 caractères'),
   
-  body("totalAmount")
+  body('amount')
     .notEmpty()
-    .withMessage("Le montant total est requis")
-    .isNumeric()
-    .withMessage("Le montant doit être un nombre")
+    .withMessage('Le montant est requis')
     .isFloat({ min: 0 })
-    .withMessage("Le montant doit être positif"),
+    .withMessage('Le montant doit être un nombre positif'),
   
-  handleValidationErrors,
+  body('startDate')
+    .notEmpty()
+    .withMessage('La date de début est requise')
+    .isISO8601()
+    .withMessage('Format de date invalide'),
+  
+  body('endDate')
+    .notEmpty()
+    .withMessage('La date de fin est requise')
+    .isISO8601()
+    .withMessage('Format de date invalide')
+    .custom((endDate, { req }) => {
+      if (new Date(endDate) <= new Date(req.body.startDate)) {
+        throw new Error('La date de fin doit être après la date de début');
+      }
+      return true;
+    }),
 ];
 
-export const validateUpdateBudget = [
-  param("id")
+export const updateBudgetValidation = [
+  param('id')
     .isMongoId()
-    .withMessage("ID invalide"),
+    .withMessage('ID de budget invalide'),
   
-  body("month")
+  body('name')
     .optional()
-    .matches(/^\d{4}-(0[1-9]|1[0-2])$/)
-    .withMessage("Format invalide. Utilisez YYYY-MM"),
+    .trim()
+    .isLength({ min: 3, max: 100 })
+    .withMessage('Le nom doit contenir entre 3 et 100 caractères'),
   
-  body("totalAmount")
+  body('amount')
     .optional()
-    .isNumeric()
-    .withMessage("Le montant doit être un nombre")
     .isFloat({ min: 0 })
-    .withMessage("Le montant doit être positif"),
+    .withMessage('Le montant doit être un nombre positif'),
   
-  handleValidationErrors,
+  body('startDate')
+    .optional()
+    .isISO8601()
+    .withMessage('Format de date invalide'),
+  
+  body('endDate')
+    .optional()
+    .isISO8601()
+    .withMessage('Format de date invalide'),
 ];
 
-export const validateBudgetId = [
-  param("id")
+export const budgetIdValidation = [
+  param('id')
     .isMongoId()
-    .withMessage("ID de budget invalide"),
-  
-  handleValidationErrors,
+    .withMessage('ID de budget invalide'),
 ];

@@ -120,7 +120,7 @@ projet-mern-budget/
 
 ---
 
-## 🔗 Schéma d’architecture
+## 🔗 Schéma d’architecture et relations
 
 ```
 FRONTEND (React)
@@ -129,6 +129,27 @@ BACKEND (Node.js + Express)
     ↓ Mongoose
 DATABASE (MongoDB)
 ```
+```
+1. Relation 1-to-1 : User ↔ Profile
+
+Un utilisateur a un seul profil, et un profil appartient à un seul utilisateur.
+2. Relation 1-to-Many : User → Budget
+
+Un utilisateur peut créer plusieurs budgets, mais chaque budget appartient à un seul utilisateur.
+3. Relation 1-to-Many : User → Expense
+
+Un utilisateur peut avoir plusieurs dépenses, mais chaque dépense appartient à un seul utilisateur.
+4. Relation 1-to-Many : Budget → Expense
+
+Un budget peut contenir plusieurs dépenses, mais chaque dépense appartient à un seul budget.
+5. Relation Many-to-Many : User ↔ Category
+
+Un utilisateur peut avoir plusieurs catégories, et une catégorie peut appartenir à plusieurs utilisateurs.
+6. Relation Many-to-One : Expense → Category
+
+Plusieurs dépenses peuvent appartenir à une même catégorie, mais chaque dépense a une seule catégorie.
+
+
 
 ---
 
